@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>False Ad Detector — Modern UI</title>
+  <meta name="description" content="Detect misleading ads across text, image and video with an AI-powered analyzer."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #F4F6FA;
+      --surface: #FFFFFF;
+      --muted: #6b7280;
+      --text: #0F172A;
+      --primary: #4F46E5;
+      --primary-600: #6366F1;
+      --accent: #A5B4FC;
+      --success: #16A34A;
+      --warn: #F59E0B;
+      --danger: #EF4444;
+      --glass: rgba(255,255,255,0.6);
+      --card-radius: 14px;
+      --glass-blur: 8px;
+      --shadow-soft: 0 8px 30px rgba(15,23,42,0.06);
+      --shadow-subtle: 0 4px 12px rgba(15,23,42,0.04);
+      --ease: cubic-bezier(.2,.9,.2,1);
+    }
+
+    /* Reset & base */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg,var(--bg),#eef2ff 120%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .container{width:92%;max-width:1200px;margin:0 auto;padding:28px 0;}
+
+    /* Header - sticky glass */
+    header{
+      position: sticky;
+      top:0;
+      z-index:40;
+      backdrop-filter: blur(var(--glass-blur));
+      background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.62));
+      border-bottom: 1px solid rgba(15,23,42,0.04);
+      box-shadow: var(--shadow-subtle);
+    }
+    .header-inner{
+      display:flex;
+      gap:20px;
+      align-items:center;
+      justify-content:space-between;
+      height:68px;
+    }
+    .logo{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      font-weight:700;
+      letter-spacing:-0.02em;
+      color:var(--primary);
+    }
+    .logo-mark{
+      width:40px;height:40px;border-radius:10px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--primary),var(--primary-600));
+      color:white;font-weight:800;font-size:18px;box-shadow:0 6px 18px rgba(79,70,229,0.18);
+    }
+    nav ul{display:flex;gap:10px;align-items:center}
+    nav a{
+      padding:8px 12px;border-radius:10px;font-weight:600;color:var(--muted);
+      transition: all 160ms var(--ease);
+    }
+    nav a:hover{color:var(--primary);transform:translateY(-2px)}
+    nav a.active{color:var(--primary);background:rgba(99,102,241,0.08)}
+
+    /* Hero */
+    .hero{
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:36px;
+      align-items:center;
+      padding:56px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.08), rgba(99,102,241,0.04));
+      border-radius:18px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom:36px;
+    }
+    .hero h1{font-size:2.1rem;margin-bottom:12px;color:var(--text);letter-spacing:-0.01em}
+    .hero p{color:var(--muted);margin-bottom:20px;font-size:1rem;max-width:62ch}
+    .hero-cta{display:flex;gap:12px;align-items:center}
+    .btn{
+      appearance:none;cursor:pointer;border:0;padding:12px 18px;border-radius:12px;
+      font-weight:700;transition:all 220ms var(--ease);
+    }
+    .btn-primary{
+      background:linear-gradient(90deg,var(--primary),var(--primary-600));
+      color:white;box-shadow:0 12px 30px rgba(99,102,241,0.14);
+    }
+    .btn-primary:hover{transform:translateY(-4px)}
+    .btn-ghost{
+      background:transparent;border:1px solid rgba(15,23,42,0.06);color:var(--text);font-weight:600;
+    }
+    .hero-figure{
+      width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+      transform: translateY(0); transition: transform 550ms var(--ease);
+    }
+    .hero-figure svg{width:100%;height:auto;max-width:380px}
+
+    /* Features row */
+    .features{display:flex;gap:18px;margin-bottom:28px}
+    .card{
+      background:var(--surface);
+      border-radius:var(--card-radius);
+      padding:20px;
+      flex:1;
+      box-shadow:var(--shadow-subtle);
+      transition: transform 260ms var(--ease), box-shadow 260ms var(--ease);
+      border:1px solid rgba(15,23,42,0.02);
+    }
+    .card:hover{transform:translateY(-8px);box-shadow:0 14px 40px rgba(15,23,42,0.06)}
+    .card h3{margin:0 0 8px;color:var(--primary)}
+    .card p{margin:0;color:var(--muted);font-size:0.97rem}
+
+    /* Upload section */
+    .upload-panel{
+      margin: 0 auto 36px;
+      background:var(--surface);
+      border-radius:16px;
+      padding:20px;
+      box-shadow:var(--shadow-soft);
+      max-width:960px;
+      border:1px solid rgba(15,23,42,0.03);
+    }
+    .upload-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;
+    }
+    .upload-top h2{margin:0;font-size:1.1rem;color:var(--primary)}
+    .upload-options{display:flex;gap:12px;flex-wrap:wrap}
+    .upload-option{
+      flex:1;min-width:160px;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:12px;padding:16px;
+      display:flex;gap:12px;align-items:center;border:1px solid rgba(15,23,42,0.03);cursor:pointer;
+      transition:transform 220ms var(--ease), box-shadow 220ms var(--ease), border-color 220ms var(--ease);
+    }
+    .upload-option .icon{
+      width:48px;height:48px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(180deg,#f3f4ff,#eef2ff);
+      font-size:20px;color:var(--primary-600);
+    }
+    .upload-option h4{margin:0;font-size:0.98rem}
+    .upload-option p{margin:0;font-size:0.85rem;color:var(--muted)}
+    .upload-option:hover{transform:translateY(-6px)}
+    .upload-option.active{
+      border-color: rgba(79,70,229,0.18);
+      box-shadow: 0 10px 30px rgba(79,70,229,0.08);
+      background:linear-gradient(180deg, rgba(99,102,241,0.03), #ffffff);
+    }
+
+    .upload-forms{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
+    form.field{background:transparent;padding:8px;border-radius:10px}
+    textarea,input[type="file"],input[type="text"]{
+      width:100%;padding:12px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);resize:vertical;background:#fbfdff;
+      font-family:inherit;font-size:0.95rem;color:var(--text)
+    }
+    .submit-btn{display:block;width:100%;padding:12px;border-radius:10px;background:linear-gradient(90deg,var(--primary),var(--primary-600));color:white;border:0;font-weight:700;cursor:pointer;margin-top:8px}
+    .submit-btn[disabled]{opacity:0.6;cursor:not-allowed}
+
+    /* Sidebar / quick tips */
+    .panel{
+      background:linear-gradient(180deg,#fff,#fbfdff);
+      padding:14px;border-radius:12px;border:1px solid rgba(15,23,42,0.02);box-shadow:var(--shadow-subtle)
+    }
+    .muted{color:var(--muted);font-size:0.92rem}
+
+    /* Analysis result */
+    .analysis{
+      margin-top:22px;background:var(--surface);padding:22px;border-radius:14px;box-shadow:var(--shadow-soft);
+      max-width:980px;margin-left:auto;margin-right:auto;border:1px solid rgba(15,23,42,0.03);
+    }
+    .risk-badge{
+      display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;font-weight:700;
+      color:white;margin-bottom:14px;box-shadow:0 8px 30px rgba(79,70,229,0.06);
+    }
+    .risk-high{background:linear-gradient(90deg,var(--danger),#e05252)}
+    .risk-medium{background:linear-gradient(90deg,var(--warn),#f59e0b)}
+    .risk-low{background:linear-gradient(90deg,var(--success),#10b981)}
+
+    .analysis-details ul{margin:12px 0 18px 20px;color:var(--muted)}
+
+    .suspicious-text{
+      background:linear-gradient(180deg,#fff6f6,#fff8f8);border-left:4px solid rgba(239,68,68,0.16);
+      padding:12px;border-radius:8px;margin:14px 0;color:var(--danger);font-weight:600;
+    }
+
+    .analysis-image{width:100%;border-radius:10px;margin-top:12px;display:block;object-fit:cover;max-height:360px}
+
+    /* Dashboard */
+    .dashboard{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+    .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
+    .table th, .table td{padding:12px 14px;text-align:left;background:transparent;border-bottom:1px solid rgba(15,23,42,0.04)}
+    .table thead th{background:#fbfdff;color:var(--muted);font-weight:700}
+    .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}
+    .status-high{color:var(--danger);font-weight:700}
+    .status-high .status-dot{background:var(--danger)}
+    .status-medium{color:var(--warn);font-weight:700}
+    .status-medium .status-dot{background:var(--warn)}
+    .status-low{color:var(--success);font-weight:700}
+    .status-low .status-dot{background:var(--success)}
+
+    /* About process steps */
+    .process{display:flex;gap:16px;flex-wrap:wrap}
+    .step{flex:1;min-width:160px;padding:16px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid rgba(15,23,42,0.03)}
+    .step .num{width:36px;height:36px;border-radius:9px;background:linear-gradient(90deg,var(--primary),var(--primary-600));color:white;display:grid;place-items:center;font-weight:700;margin-bottom:10px}
+
+    footer{margin-top:36px;padding:28px 0;text-align:center;color:var(--muted);font-size:0.95rem}
+
+    /* Small screens */
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr; padding:36px}
+      .upload-forms{grid-template-columns:1fr}
+      .dashboard{grid-template-columns:1fr}
+      nav ul{display:none}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner" role="banner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo" aria-hidden="true">
+          <div class="logo-mark">FA</div>
+          <div style="display:flex;flex-direction:column;line-height:0.95">
+            <span style="font-size:0.95rem">False Ad</span>
+            <span style="font-size:0.72rem;color:var(--muted);font-weight:600;margin-top:2px">Detector</span>
+          </div>
+        </div>
+      </div>
+
+      <nav aria-label="Main navigation">
+        <ul>
+          <li><a href="index.html?page=home" class="active" data-link="home">Home</a></li>
+          <li><a href="index.html?page=upload" data-link="upload">Upload</a></li>
+          <li><a href="index.html?page=dashboard" data-link="dashboard">Dashboard</a></li>
+          <li><a href="index.html?page=about" data-link="about">About AI</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <!-- HOME -->
+    <section id="home-page" class="page">
+      <div class="hero" role="region" aria-labelledby="hero-title">
+        <div>
+          <h1 id="hero-title">Detect misleading ads across text, image & video</h1>
+          <p>Upload ad copy, images, or video clips and let our multi-modal AI highlight false or misleading claims, manipulated visuals, and suspicious patterns — fast and clearly.</p>
+
+          <div class="hero-cta">
+            <button class="btn btn-primary" id="start-upload">Analyze an Ad</button>
+            <a class="btn btn-ghost" href="index.html?page=about" data-link="about">How it works</a>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:18px">
+            <div style="display:flex;align-items:center;gap:8px"><strong style="color:var(--primary)">Trusted patterns</strong> <span class="muted">• Trained on verified datasets</span></div>
+          </div>
+        </div>
+
+        <div class="hero-figure" aria-hidden="true">
+          <!-- simple illustrative SVG -->
+          <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#EEF2FF"/><stop offset="1" stop-color="#EEF9FF"/></linearGradient>
+            </defs>
+            <rect x="10" y="40" rx="22" ry="22" width="420" height="260" fill="url(#g1)"></rect>
+            <g transform="translate(40,80)">
+              <rect x="10" y="10" rx="10" width="220" height="34" fill="#fff"></rect>
+              <rect x="10" y="60" rx="8" width="180" height="18" fill="#fff"></rect>
+              <rect x="10" y="90" rx="8" width="160" height="18" fill="#fff"></rect>
+              <circle cx="320" cy="60" r="44" fill="#fff"></circle>
+              <path d="M290 170 q30 -40 90 -10" stroke="#c7d2fe" stroke-width="10" fill="none" stroke-linecap="round" />
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="features" aria-hidden="true">
+        <div class="card"><h3>Text Analysis</h3><p>NLP models flag deceptive language, unsupported claims, and exaggerated promises.</p></div>
+        <div class="card"><h3>Image Forensics</h3><p>Detects manipulation, misleading comparisons, and tampered before/after images.</p></div>
+        <div class="card"><h3>Video Frame Audit</h3><p>Frame-by-frame checks highlight inconsistent footage and timestamped issues.</p></div>
+      </div>
+    </section>
+
+    <!-- UPLOAD -->
+    <section id="upload-page" class="page" hidden>
+      <div class="upload-panel" role="region" aria-labelledby="upload-title">
+        <div class="upload-top">
+          <h2 id="upload-title">Upload Your Ad</h2>
+          <div class="muted">Choose the ad type to analyze — we’ll return a clear risk summary.</div>
+        </div>
+
+        <div class="upload-options" role="tablist" aria-label="Upload types">
+          <div class="upload-option active" data-type="text" role="tab" tabindex="0" aria-selected="true">
+            <div class="icon">📝</div>
+            <div>
+              <h4>Text Ad</h4>
+              <p>Paste ad copy for analysis</p>
+            </div>
+          </div>
+
+          <div class="upload-option" data-type="image" role="tab" tabindex="0" aria-selected="false">
+            <div class="icon">🖼️</div>
+            <div>
+              <h4>Image Ad</h4>
+              <p>Upload images (jpg, png)</p>
+            </div>
+          </div>
+
+          <div class="upload-option" data-type="video" role="tab" tabindex="0" aria-selected="false">
+            <div class="icon">🎥</div>
+            <div>
+              <h4>Video Ad</h4>
+              <p>Upload short clips (mp4)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-forms" style="margin-top:18px">
+          <div>
+            <!-- TEXT FORM -->
+            <form id="text-form" class="field" aria-hidden="false">
+              <label for="ad-text" class="muted" style="display:block;margin-bottom:8px">Paste your ad text</label>
+              <textarea id="ad-text" placeholder="e.g. Lose 10 lbs in 3 days without diet..." aria-label="Ad text"></textarea>
+              <button type="button" class="submit-btn" id="analyze-text">Analyze Text Ad</button>
+            </form>
+
+            <!-- IMAGE FORM -->
+            <form id="image-form" class="field" aria-hidden="true" style="display:none">
+              <label class="muted" style="display:block;margin-bottom:8px">Select an image</label>
+              <input id="image-input" type="file" accept="image/*" aria-label="Image upload">
+              <button type="button" class="submit-btn" id="analyze-image">Analyze Image Ad</button>
+            </form>
+
+            <!-- VIDEO FORM -->
+            <form id="video-form" class="field" aria-hidden="true" style="display:none">
+              <label class="muted" style="display:block;margin-bottom:8px">Select a video</label>
+              <input id="video-input" type="file" accept="video/*" aria-label="Video upload">
+              <button type="button" class="submit-btn" id="analyze-video">Analyze Video Ad</button>
+            </form>
+          </div>
+
+          <aside class="panel" aria-hidden="false">
+            <strong>Quick tips</strong>
+            <p class="muted" style="margin-top:8px">Paste the full copy and include any visible disclaimers. For images, upload the exact ad screenshot to preserve context.</p>
+
+            <div style="margin-top:14px">
+              <small class="muted">Example flags</small>
+              <ul style="margin:8px 0 0 18px;color:var(--muted)">
+                <li>Unverified medical claims</li>
+                <li>Manipulated size comparisons</li>
+                <li>Impossibly short timelines</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANALYSIS -->
+    <section id="analysis-page" class="page" hidden>
+      <div class="analysis" role="region" aria-labelledby="analysis-title">
+        <h2 id="analysis-title">Analysis Result</h2>
+
+        <div id="riskWrap" style="margin-top:12px">
+          <div class="risk-badge risk-high" id="riskBadge">
+            <span style="font-size:14px">⚠️</span>
+            <span id="riskText">High Risk: Likely False Advertising</span>
+          </div>
+        </div>
+
+        <div class="analysis-details">
+          <h3 style="margin-bottom:8px">Detected Issues</h3>
+          <ul id="issuesList">
+            <li>Exaggerated health claims without scientific evidence</li>
+            <li>Manipulated before/after imagery</li>
+            <li>Unrealistic timeframes for results</li>
+          </ul>
+
+          <div class="suspicious-text" id="flaggedText">"Lose 10 lbs in 3 days without exercise or diet changes!"</div>
+
+          <img src="https://via.placeholder.com/900x360?text=Flagged+Ad+Image" alt="Flagged ad" class="analysis-image" />
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:18px;align-items:center">
+          <button class="btn btn-primary" id="analyzeAnother">Analyze Another Ad</button>
+          <button class="btn btn-ghost" id="gotoDashboard">View Dashboard</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard-page" class="page" hidden>
+      <h2 style="color:var(--primary);margin-bottom:14px">Analysis Dashboard</h2>
+      <div class="dashboard">
+        <div>
+          <div class="panel" style="margin-bottom:14px">
+            <strong>Recent Analyses</strong>
+            <table class="table" style="margin-top:12px">
+              <thead><tr><th>Ad Type</th><th>Risk</th><th>Date</th></tr></thead>
+              <tbody id="recentRows">
+                <tr><td>Text</td><td class="status-high"><span class="status-dot"></span> High</td><td>10/15/2023</td></tr>
+                <tr><td>Image</td><td class="status-medium"><span class="status-dot"></span> Medium</td><td>10/14/2023</td></tr>
+                <tr><td>Video</td><td class="status-low"><span class="status-dot"></span> Low</td><td>10/12/2023</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="panel">
+            <strong>Detailed History</strong>
+            <table class="table" style="margin-top:12px">
+              <thead><tr><th>Ad Type</th><th>Risk</th><th>Details</th><th>Date</th></tr></thead>
+              <tbody>
+                <tr><td>Text</td><td class="status-high"><span class="status-dot"></span>High</td><td>Exaggerated weight loss claim</td><td>10/15/2023</td></tr>
+                <tr><td>Image</td><td class="status-medium"><span class="status-dot"></span>Medium</td><td>Misleading product size</td><td>10/14/2023</td></tr>
+                <tr><td>Video</td><td class="status-low"><span class="status-dot"></span>Low</td><td>Minor exaggeration</td><td>10/12/2023</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside>
+          <div class="panel">
+            <strong>Risk Distribution</strong>
+            <div style="height:200px;display:grid;place-items:center;color:var(--muted)">Chart placeholder</div>
+          </div>
+
+          <div class="panel" style="margin-top:12px">
+            <strong>Export</strong>
+            <p class="muted" style="margin-top:8px">You can export CSV or JSON summaries here (placeholder).</p>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn btn-ghost" disabled>Export CSV</button>
+              <button class="btn btn-ghost" disabled>Export JSON</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about-page" class="page" hidden>
+      <div class="panel">
+        <h2 style="color:var(--primary);margin-top:0">How Our AI Detection Works</h2>
+        <p class="muted">We use multi-modal machine learning, pattern matching, and continuous feedback to identify misleading advertising across text, image and video.</p>
+
+        <div style="margin-top:14px">
+          <h3 style="margin-bottom:8px;color:var(--primary)">Multi-Modal Analysis</h3>
+          <ul style="color:var(--muted)">
+            <li><strong>Text:</strong> NLP flags exaggerated language and unsupported claims.</li>
+            <li><strong>Image:</strong> Forensics detect manipulation and misleading comparisons.</li>
+            <li><strong>Video:</strong> Frame-by-frame checks reveal edits and inconsistencies.</li>
+          </ul>
+        </div>
+
+        <div style="margin-top:18px">
+          <h3 style="margin-bottom:8px;color:var(--primary)">Detection Process</h3>
+          <div class="process" style="margin-top:8px">
+            <div class="step"><div class="num">1</div><strong>Ingest</strong><div class="muted" style="margin-top:6px">Prepare and contextually parse content.</div></div>
+            <div class="step"><div class="num">2</div><strong>Extract</strong><div class="muted" style="margin-top:6px">Pull features from text, images, and audio.</div></div>
+            <div class="step"><div class="num">3</div><strong>Match</strong><div class="muted" style="margin-top:6px">Compare against verified false ad patterns.</div></div>
+            <div class="step"><div class="num">4</div><strong>Assess</strong><div class="muted" style="margin-top:6px">Produce a transparent risk score with evidence.</div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px">
+          <h3 style="margin-bottom:8px;color:var(--primary)">Continuous Learning</h3>
+          <p class="muted">Feedback and new labeled examples allow the system to evolve with new tactics used in modern advertising.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <small>&copy; 2025 False Ad Detector Prototype. Demo for educational purposes.</small>
+    </div>
+  </footer>
+
+  <script>
+    // Simple SPA-ish routing and UI interactions (no framework)
+    (function(){
+      const pages = ['home','upload','analysis','dashboard','about'];
+      const navLinks = document.querySelectorAll('nav a');
+      const pageEls = {};
+      pages.forEach(p => pageEls[p] = document.getElementById(p + '-page'));
+
+      function showPage(name){
+        pages.forEach(p => {
+          if(p === name) pageEls[p].removeAttribute('hidden');
+          else pageEls[p].setAttribute('hidden','');
+        });
+        // highlight nav
+        navLinks.forEach(a => {
+          const link = a.getAttribute('data-link') || a.getAttribute('href').split('page=')[1];
+          if(link === name){ a.classList.add('active'); a.style.color = ''; }
+          else a.classList.remove('active');
+        });
+        // update URL without reload
+        if(history.pushState) history.pushState({}, '', window.location.pathname + '?page=' + name);
+      }
+
+      // initial page from query
+      const urlParams = new URLSearchParams(window.location.search);
+      const page = urlParams.get('page') || 'home';
+      showPage(page);
+
+      // nav click handlers
+      navLinks.forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          const link = a.getAttribute('data-link') || a.getAttribute('href').split('page=')[1];
+          showPage(link || 'home');
+        });
+      });
+
+      // hero CTA
+      document.getElementById('start-upload').addEventListener('click', () => showPage('upload'));
+
+      // upload option switching
+      const options = Array.from(document.querySelectorAll('.upload-option'));
+      function activateOption(type){
+        options.forEach(opt => {
+          const is = opt.getAttribute('data-type') === type;
+          opt.classList.toggle('active', is);
+          opt.setAttribute('aria-selected', is ? 'true' : 'false');
+        });
+        // show forms
+        document.getElementById('text-form').style.display = type === 'text' ? '' : 'none';
+        document.getElementById('text-form').setAttribute('aria-hidden', type === 'text' ? 'false' : 'true');
+        document.getElementById('image-form').style.display = type === 'image' ? '' : 'none';
+        document.getElementById('image-form').setAttribute('aria-hidden', type === 'image' ? 'false' : 'true');
+        document.getElementById('video-form').style.display = type === 'video' ? '' : 'none';
+        document.getElementById('video-form').setAttribute('aria-hidden', type === 'video' ? 'false' : 'true');
+      }
+      options.forEach(opt => opt.addEventListener('click', () => activateOption(opt.getAttribute('data-type'))));
+      options.forEach(opt => opt.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); opt.click(); } }));
+
+      // fake analysis flows (placeholder - connect to your backend / AI infra)
+      function showAnalysis({risk='high', issues=[], flaggedText='', image=null}){
+        // set risk visuals
+        const badge = document.getElementById('riskBadge');
+        badge.className = 'risk-badge';
+        if(risk === 'high') badge.classList.add('risk-high');
+        else if(risk === 'medium') badge.classList.add('risk-medium');
+        else badge.classList.add('risk-low');
+        document.getElementById('riskText').textContent = (risk === 'high' ? 'High Risk: Likely False Advertising' : risk === 'medium' ? 'Medium Risk' : 'Low Risk');
+        // issues
+        const list = document.getElementById('issuesList');
+        list.innerHTML = '';
+        (issues.length ? issues : ['No suspicious patterns detected']).forEach(it => {
+          const li = document.createElement('li'); li.textContent = it; list.appendChild(li);
+        });
+        if(flaggedText) document.getElementById('flaggedText').textContent = flaggedText;
+        // image
+        if(image) document.querySelector('.analysis-image').src = image;
+        showPage('analysis');
+      }
+
+      document.getElementById('analyze-text').addEventListener('click', () => {
+        const txt = document.getElementById('ad-text').value.trim();
+        // simple heuristics demo (replace with real model)
+        if(!txt){ alert('Paste ad text before analyzing.'); return; }
+        let risk='low', issues=[], flagged='';
+        if(/lose \d+ lbs|without exercise|guarantee|miracle/gi.test(txt)){
+          risk='high';
+          issues = ['Exaggerated weight loss claim','Unsupported medical claim','Urgent/guaranteed language'];
+          flagged = txt.length>200 ? txt.slice(0,200)+'…' : txt;
+        } else if(/free trial|limited time/i.test(txt)){
+          risk='medium'; issues=['Potential urgency framing','Check for hidden conditions']; flagged = txt;
+        } else {
+          risk='low'; issues=['Minor promotional language'];
+        }
+        showAnalysis({risk, issues, flaggedText: flagged || txt});
+      });
+
+      document.getElementById('analyze-image').addEventListener('click', () => {
+        const file = document.getElementById('image-input').files[0];
+        if(!file){ alert('Choose an image file.'); return; }
+        // preview via URL then fake analysis
+        const url = URL.createObjectURL(file);
+        showAnalysis({
+          risk:'medium',
+          issues:['Potential manipulation detected','Comparison image seems inconsistent'],
+          flaggedText: 'Potential manipulated before/after image.',
+          image: url
+        });
+      });
+
+      document.getElementById('analyze-video').addEventListener('click', () => {
+        const file = document.getElementById('video-input').files[0];
+        if(!file){ alert('Choose a video file.'); return; }
+        showAnalysis({
+          risk:'medium',
+          issues:['Frame inconsistencies detected','Audio/text mismatch'],
+          flaggedText: 'Suspicious quick-cut edits and claims within timestamps 00:02–00:05',
+          image: 'https://via.placeholder.com/900x360?text=Video+Thumbnail+Preview'
+        });
+      });
+
+      // analyze another / goto dashboard
+      document.getElementById('analyzeAnother').addEventListener('click', ()=> showPage('upload'));
+      document.getElementById('gotoDashboard').addEventListener('click', ()=> showPage('dashboard'));
+
+      // keep hero interactions lively (subtle movement)
+      const heroFig = document.querySelector('.hero-figure');
+      if(heroFig){
+        window.addEventListener('mousemove', e=>{
+          const rect = heroFig.getBoundingClientRect();
+          const dx = (e.clientX - (rect.left + rect.width/2))/rect.width;
+          const dy = (e.clientY - (rect.top + rect.height/2))/rect.height;
+          heroFig.style.transform = `translate3d(${dx*6}px, ${dy*4}px, 0)`;
+        });
+        window.addEventListener('mouseleave', ()=> heroFig.style.transform = 'translateY(0)');
+      }
+
+      // deep link handling: back/forward buttons
+      window.addEventListener('popstate', ()=> {
+        const urlParams = new URLSearchParams(window.location.search);
+        showPage(urlParams.get('page') || 'home');
+      });
+
+    })();
+  </script>
+</body>
+</html>
